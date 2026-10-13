@@ -1,0 +1,6 @@
+ Good morning everyone. Today we are discussing the basics of artificial intelligence.
+ Artificial intelligence is a field of computer science that focuses on creating systems capable
+ of performing tasks that normally require human intelligence. For your assignment, choose
+ one real world application of artificial intelligence. Explain how it works, describe two benefits,
+ and identify one limitation. Please submit your assignment by Friday October 17th at 11.59 pm.
+ Keep your report between 1,000 and 1,500 words. Next week we will discuss machine learning and neural networks.
