@@ -4,6 +4,7 @@ from transcript_handling import load_transcript
 import os
 from pydantic import BaseModel
 from assignment_storage import get_assignment
+from assignment_storage import save_explanation
 
  
 
@@ -72,25 +73,6 @@ def explain_assignment(assignment):
         }
     )
     return response.parsed
-
-
-"""try:
-    extracted_assignments = extract_assignment(transcript=transcript)
-    for assignment in extracted_assignments.list_assigments:
-        print(assignment.description)
-        print(assignment.requirements)
-        print(assignment.min_word_count)
-        print(assignment.max_word_count)
-        print(assignment.deadline)
-except TranscriptEmptyError as e:
-    print(e)
-except Exception as e:
-    print(e)"""
-
-assignments = get_assignment()
-explanation = explain_assignment(assignment=assignments[0])
-explanation.model_dump()
-print(explanation)
 
 
 

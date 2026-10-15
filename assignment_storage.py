@@ -1,6 +1,7 @@
 import sqlite3
 import json
 
+
 def initialize_database():
    lectra_database = sqlite3.connect('lectra.db')
    cursor = lectra_database.cursor()
@@ -38,12 +39,23 @@ def get_assignment():
          "SELECT * FROM assignments"
     )
     rows = cursor.fetchall()
-    assignments = [{"id":row[0],"description":row[1],"requirements":json.loads(row[2]),"min_word_count":row[3],"max_word_count":row[4],"deadline":row[5],"ai_explanation":row[6]} for row in rows]
+    assignments = [{"id":row[0],"description":row[1],"requirements":json.loads(row[2]),"min_word_count":row[3],"max_word_count":row[4],"deadline":row[5],"ai_explanation":json.loads(row[6]) if row[6] is not None else None} for row in rows]
     lectra_database.close()
     return assignments
 
-rows = get_assignment()
-print(rows)
+def save_explanation(assignment_id,explanation):
+    lectra_database = sqlite3.connect('lectra.db')
+    explanation_data = explanation.model_dump()
+    explanation_json = json.dumps(explanation_data)
+    cursor = lectra_database.cursor()
+    with lectra_database:
+        cursor.execute(
+            "UPDATE assignments " \
+            "SET ai_explanation = ? " \
+            "WHERE id = ?",(explanation_json,assignment_id)  
+    )
+    lectra_database.close()
+     
 
 initialize_database()
 
