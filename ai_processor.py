@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 from transcript_handling import load_transcript
 import os
 from pydantic import BaseModel
-import json
+from assignment_storage import get_assignment
+
  
 
 class Assignment(BaseModel):
@@ -15,7 +16,10 @@ class Assignment(BaseModel):
 
 class MultipleAssignments(BaseModel):
     list_assigments:list[Assignment]
-
+class AssignmentExplanation(BaseModel):
+    overview:str
+    requirement_breakdown:list[str]
+    action_plan:list[str]
 
 
 load_dotenv()
@@ -24,6 +28,8 @@ client = genai.Client(api_key=API_KEY)
 transcript = load_transcript()
 
 class TranscriptEmptyError(Exception):
+    pass
+class EmptyAssignmentError(Exception):
     pass
 
 def extract_assignment(transcript):
@@ -42,7 +48,33 @@ def extract_assignment(transcript):
   
     return response.parsed
 
-try:
+def explain_assignment(assignment):
+    if assignment is None:
+        raise EmptyAssignmentError("No assignment is there")
+    description = assignment["description"]
+    requirements = assignment["requirements"]
+    prompt = f"""You are Lectra, an AI assistant that helps students understand assignments.
+    Assignment description: {description}
+    Requirements:{requirements}
+    Provide:
+    1. A simple overview of what the student must accomplish.
+    2. A clear explanation of each requirement.
+    3. An ordered, practical action plan.
+    Use beginner-friendly language. Do not invent requirements or write the complete assignment for the student.
+    Return the result using the AssignmentExplanation schema."""
+
+    response = client.models.generate_content(
+        model="gemini-3.5-flash-lite",
+        contents=prompt,
+        config={
+        "response_mime_type":"application/json",
+        "response_schema":AssignmentExplanation,
+        }
+    )
+    return response.parsed
+
+
+"""try:
     extracted_assignments = extract_assignment(transcript=transcript)
     for assignment in extracted_assignments.list_assigments:
         print(assignment.description)
@@ -53,8 +85,12 @@ try:
 except TranscriptEmptyError as e:
     print(e)
 except Exception as e:
-    print(e)
+    print(e)"""
 
+assignments = get_assignment()
+explanation = explain_assignment(assignment=assignments[0])
+explanation.model_dump()
+print(explanation)
 
 
 
