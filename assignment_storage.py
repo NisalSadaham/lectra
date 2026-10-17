@@ -5,17 +5,25 @@ import json
 def initialize_database():
    lectra_database = sqlite3.connect('lectra.db')
    cursor = lectra_database.cursor()
-   cursor.execute(
-      "CREATE TABLE IF NOT EXISTS assignments(" \
-      "id INTEGER PRIMARY KEY AUTOINCREMENT," \
-      "description TEXT NOT NULL," \
-      "requirements TEXT NOT NULL," \
-      "min_word_count INTEGER," \
-      "max_word_count INTEGER," \
-      "deadline TEXT," \
-      "ai_explanation TEXT)"
+   with lectra_database:
+    cursor.execute(
+    "CREATE TABLE IF NOT EXISTS assignments(" \
+    "id INTEGER PRIMARY KEY AUTOINCREMENT," \
+    "description TEXT NOT NULL," \
+    "requirements TEXT NOT NULL," \
+    "min_word_count INTEGER," \
+    "max_word_count INTEGER," \
+    "deadline TEXT," \
+    "ai_explanation TEXT)"
       
    )
+   cursor.execute(
+    "CREATE TABLE IF NOT EXISTS transcript_imports(" \
+    "id INTEGER PRIMARY KEY AUTOINCREMENT," \
+    "transcript_hash TEXT NOT NULL," \
+    "created_at TEXT NOT NULL)"   
+   )
+
    lectra_database.close()
 
 def save_assignment(assignment):
