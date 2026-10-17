@@ -16,7 +16,7 @@ class Assignment(BaseModel):
     deadline:str| None = None
 
 class MultipleAssignments(BaseModel):
-    list_assigments:list[Assignment]
+    list_assignments:list[Assignment]
 class AssignmentExplanation(BaseModel):
     overview:str
     requirement_breakdown:list[str]

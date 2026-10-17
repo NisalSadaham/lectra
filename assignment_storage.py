@@ -56,6 +56,15 @@ def save_explanation(assignment_id,explanation):
     )
     lectra_database.close()
      
+def assigment_exists(description):
+    assignments = get_assignment()
+    new_description = description.strip().lower()
+    for assignment in assignments:
+        cleaned_description = assignment['description'].strip().lower()
+        if cleaned_description == new_description:
+            return True
+    return False
+
 
 initialize_database()
 
