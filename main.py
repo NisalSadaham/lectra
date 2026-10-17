@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi import HTTPException
-from assignment_storage import get_assignment,save_assignment,assigment_exists
+from assignment_storage import get_assignment,save_assignment,assigment_exists,save_transcript_import
 from assignment_service import coordination
 from pydantic import BaseModel
 from ai_processor import extract_assignment
+from transcript_handling import generate_transcript_hash
 
 app = FastAPI()
 
@@ -31,11 +32,13 @@ def transcript_request(transcript_request:TranscriptRequest):
     duplicate_assignments = []
     if transcript_request.transcript.strip() == "":
         raise HTTPException(status_code=400,detail="Bad request(Transcript cannot be empty)")
+    transcript_hash = generate_transcript_hash(transcript_request.transcript)
+    import_id = save_transcript_import(transcript_hash=transcript_hash)
     extracted_assignment = extract_assignment(transcript_request.transcript)
     for assignment in extracted_assignment.list_assignments:
-        duplicate = assigment_exists()
+        duplicate = assigment_exists(assignment.description)
         if not duplicate:
-            save_assignment(assignment=assignment)
+            save_assignment(assignment=assignment,import_id=import_id)
             saved_assignments.append(assignment)
         else:
             duplicate_assignments.append(assignment)
