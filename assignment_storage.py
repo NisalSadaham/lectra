@@ -97,7 +97,7 @@ def find_transcript_import(transcript_hash):
     lectra_database = sqlite3.connect('lectra.db')
     cursor = lectra_database.cursor()
     cursor.execute(
-        "SELECT id,transcript_hash FROM transcript_imports WHERE transcript_hash = ?",(transcript_hash,)
+        "SELECT id,transcript_hash FROM transcript_imports WHERE transcript_hash = ? ORDER BY id DESC",(transcript_hash,)
     )
     row = cursor.fetchone()
     lectra_database.close()
@@ -115,7 +115,17 @@ def save_transcript_import(transcript_hash):
     import_id = cursor.lastrowid
     lectra_database.close()
     return import_id
-    
+def find_completed_transcript_import(transcript_hash):
+    lectra_database = sqlite3.connect('lectra.db')
+    cursor = lectra_database.cursor()
+    cursor.execute(
+        "SELECT DISTINCT t.id, t.transcript_hash FROM transcript_imports t JOIN assignments a ON t.id = a.import_id WHERE t.transcript_hash = ? ORDER BY t.id DESC",(transcript_hash,))
+    row = cursor.fetchone()
+    lectra_database.close()
+    if(row):
+        return row
+    return None
+
 
     
 
