@@ -125,6 +125,13 @@ def find_completed_transcript_import(transcript_hash):
     if(row):
         return row
     return None
+def delete_transcript_import(import_id):
+    lectra_database = sqlite3.connect('lectra.db')
+    cursor = lectra_database.cursor()
+    with lectra_database:
+        cursor.execute(
+        "DELETE FROM transcript_imports WHERE ID = ?",(import_id,))
+    lectra_database.close()
 
 
     

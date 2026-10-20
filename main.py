@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi import HTTPException
-from assignment_storage import get_assignment,save_assignment,assigment_exists,save_transcript_import,find_transcript_import,get_assignments_by_import_id,find_completed_transcript_import
+from assignment_storage import get_assignment,save_assignment,assigment_exists,save_transcript_import,find_transcript_import,get_assignments_by_import_id,find_completed_transcript_import,delete_transcript_import
 from assignment_service import coordination
 from pydantic import BaseModel
 from ai_processor import extract_assignment
@@ -15,7 +15,7 @@ class TranscriptRequest(BaseModel):
 
 
 @app.get('/assignments')
-def get_assigment_data():
+def get_assignment_data():
     assignments = get_assignment()
     return{
         "response":assignments
@@ -33,6 +33,8 @@ def get_explanation(assignment_id:int):
 def transcript_request(transcript_request:TranscriptRequest):
     saved_assignments = []
     duplicate_assignments = []
+    status = "completed"
+    message = "Assignments imported successfully."
     if transcript_request.transcript.strip() == "":
         raise HTTPException(status_code=400,detail="Bad request(Transcript cannot be empty)")
     transcript_hash = generate_transcript_hash(transcript_request.transcript)
@@ -43,12 +45,19 @@ def transcript_request(transcript_request:TranscriptRequest):
         import_id = existing_import[0]
         assignments = get_assignments_by_import_id(import_id)
         return {
+        "status":status,
+        "message": "Import completed, existing assignments reused successfully.",
         "assignments": assignments
         }
     else:
         import_id = save_transcript_import(transcript_hash=transcript_hash)
+    try:
+        extracted_assignment = extract_assignment(transcript_request.transcript)
+    except Exception:
+        delete_transcript_import(import_id=import_id)
+        raise HTTPException(status_code=500,detail="Failed to process transcript. Please try again")
+   
 
-    extracted_assignment = extract_assignment(transcript_request.transcript)
     for assignment in extracted_assignment.list_assignments:
         duplicate = assigment_exists(assignment.description)
         if not duplicate:
@@ -56,8 +65,14 @@ def transcript_request(transcript_request:TranscriptRequest):
             saved_assignments.append(assignment)
         else:
             duplicate_assignments.append(assignment)
+    if len(extracted_assignment.list_assignments) == 0:
+        messsage = "The import completed, but no assignments were found in the transcript."
+    elif not saved_assignments:
+            message = "Import completed, but no new assignments were saved."
     return{
-        "saved_assigments":saved_assignments,
-        "duplicate_assigments":duplicate_assignments
+        "status":status,
+        "message":message,
+        "saved_assignments":saved_assignments,
+        "duplicate_assignments":duplicate_assignments
     }
     
