@@ -66,7 +66,7 @@ def transcript_request(transcript_request:TranscriptRequest):
         else:
             duplicate_assignments.append(assignment)
     if len(extracted_assignment.list_assignments) == 0:
-        messsage = "The import completed, but no assignments were found in the transcript."
+        message = "The import completed, but no assignments were found in the transcript."
     elif not saved_assignments:
             message = "Import completed, but no new assignments were saved."
     return{
