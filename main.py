@@ -6,8 +6,17 @@ from pydantic import BaseModel
 from ai_processor import extract_assignment
 from transcript_handling import generate_transcript_hash
 from typing import Literal
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:54169"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class TranscriptRequest(BaseModel):
     transcript:str
